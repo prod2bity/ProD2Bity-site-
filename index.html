@@ -250,7 +250,6 @@
   </main>
 
   <script>
-    // Solicitar permissão para notificações se ainda não concedida
     if (Notification.permission !== "granted") {
       Notification.requestPermission();
     }
@@ -261,10 +260,10 @@
     let jogoAnterior = {};
 
     /**
-     * Cria HTML para lista de gols por time
-     * @param {Array} scorers - lista simulada de artilheiros
-     * @param {string} lado - "home" ou "away"
-     * @returns {string} HTML com os gols formatados
+     * Formata gols para um time
+     * @param {Array} scorers 
+     * @param {string} lado 
+     * @returns {string}
      */
     function formatarGols(scorers, lado) {
       if (!scorers || !Array.isArray(scorers)) return '<p style="color:#666;">Sem gols</p>';
@@ -279,10 +278,10 @@
     }
 
     /**
-     * Cria um card do jogo com detalhes e gols
-     * @param {Object} jogo - dados do jogo
-     * @param {boolean} isGoal - se teve gol recente para animar
-     * @returns {HTMLElement} elemento <li> do jogo
+     * Cria um card de jogo
+     * @param {Object} jogo 
+     * @param {boolean} isGoal 
+     * @returns {HTMLElement}
      */
     function criarCard(jogo, isGoal = false) {
       const li = document.createElement("li");
@@ -324,61 +323,65 @@
     }
 
     /**
-     * Busca jogos ao vivo e atualiza a lista
+     * Simula busca de jogos (mock)
      */
-    async function buscarJogos() {
-      try {
-        loadingEl.hidden = false;
-        noGamesEl.hidden = true;
+    async function buscarJogosMock() {
+      loadingEl.hidden = false;
+      noGamesEl.hidden = true;
 
-        const res = await fetch("https://api.football-data.org/v4/matches?status=LIVE", {
-          headers: { "X-Auth-Token": "932dba4abe844f11b3e8fd48d1f20af9" }
-        });
-        const data = await res.json();
-        const jogos = data.matches || [];
+      // Simulação de dados ao vivo
+      const jogos = [
+        {
+          homeTeam: { name: "Corinthians" },
+          awayTeam: { name: "Palmeiras" },
+          score: { fullTime: { home: 1, away: 2 } },
+          status: "LIVE",
+          scorers: [
+            { team: "home", player: "Fábio Santos", minute: 12 },
+            { team: "away", player: "Dudu", minute: 33 },
+            { team: "away", player: "Rony", minute: 67 }
+          ]
+        },
+        {
+          homeTeam: { name: "Flamengo" },
+          awayTeam: { name: "Vasco" },
+          score: { fullTime: { home: 0, away: 0 } },
+          status: "LIVE",
+          scorers: []
+        }
+      ];
 
-        loadingEl.hidden = true;
-        jogosEl.innerHTML = "";
+      loadingEl.hidden = true;
+      jogosEl.innerHTML = "";
 
-        if (jogos.length === 0) {
-          noGamesEl.hidden = false;
-          return;
+      if (jogos.length === 0) {
+        noGamesEl.hidden = false;
+        return;
+      }
+
+      for (const jogo of jogos) {
+        const id = `${jogo.homeTeam.name} vs ${jogo.awayTeam.name}`;
+        const homeScore = jogo.score.fullTime.home ?? 0;
+        const awayScore = jogo.score.fullTime.away ?? 0;
+        const anterior = jogoAnterior[id];
+
+        const isGoal = anterior && (anterior.homeScore !== homeScore || anterior.awayScore !== awayScore);
+
+        jogosEl.appendChild(criarCard(jogo, isGoal));
+
+        if (isGoal && Notification.permission === "granted") {
+          new Notification("⚽ Gol Atualizado!", {
+            body: `${jogo.homeTeam.name} ${homeScore} x ${awayScore} ${jogo.awayTeam.name}`,
+          });
         }
 
-        // Percorrer jogos e criar cards
-        for (const jogo of jogos) {
-          const id = `${jogo.homeTeam.name} vs ${jogo.awayTeam.name}`;
-          const homeScore = jogo.score.fullTime.home ?? 0;
-          const awayScore = jogo.score.fullTime.away ?? 0;
-          const anterior = jogoAnterior[id];
-
-          // Simular artilheiros (exemplo temporário, pois a API oficial não entrega essa info)
-          jogo.scorers = [
-            ...(homeScore > 0 ? [{team:'home', player:'Jogador A', minute:12}] : []),
-            ...(awayScore > 0 ? [{team:'away', player:'Jogador B', minute:33}] : [])
-          ];
-
-          const isGoal = anterior && (anterior.homeScore !== homeScore || anterior.awayScore !== awayScore);
-
-          jogosEl.appendChild(criarCard(jogo, isGoal));
-
-          if (isGoal && Notification.permission === "granted") {
-            new Notification("⚽ Gol Atualizado!", {
-              body: `${jogo.homeTeam.name} ${homeScore} x ${awayScore} ${jogo.awayTeam.name}`,
-            });
-          }
-
-          jogoAnterior[id] = { homeScore, awayScore };
-        }
-      } catch (err) {
-        loadingEl.textContent = "Erro ao carregar jogos. Tente recarregar a página.";
-        console.error(err);
+        jogoAnterior[id] = { homeScore, awayScore };
       }
     }
 
-    // Inicializar e atualizar a cada 15 segundos
-    buscarJogos();
-    setInterval(buscarJogos, 15000);
+    // Inicializa com mock e atualiza a cada 15s
+    buscarJogosMock();
+    setInterval(buscarJogosMock, 15000);
   </script>
 </body>
 </html>
