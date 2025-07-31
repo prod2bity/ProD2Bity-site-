@@ -1,339 +1,384 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" >
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ProD2Bity IA Turbinada</title>
-<style>
-  body {
-    background: #121212;
-    color: #eee;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    padding: 20px;
-    margin: 0;
-  }
-  #chat {
-    max-width: 600px;
-    margin: auto;
-    border: 2px solid #00d4ff;
-    border-radius: 10px;
-    padding: 15px;
-    background: #1f1f1f;
-    display: flex;
-    flex-direction: column;
-    height: 80vh;
-  }
-  #messages {
-    flex: 1;
-    overflow-y: auto;
-    padding-right: 10px;
-  }
-  .msg {
-    margin: 8px 0;
-    padding: 8px 12px;
-    border-radius: 15px;
-    max-width: 80%;
-    line-height: 1.4;
-    white-space: pre-wrap;
-  }
-  .user {
-    background: #0f0;
-    color: #000;
-    align-self: flex-end;
-  }
-  .bot {
-    background: #00d4ff;
-    color: #000;
-    align-self: flex-start;
-  }
-  #inputRow {
-    display: flex;
-    gap: 10px;
-    margin-top: 10px;
-  }
-  #input {
-    flex: 1;
-    padding: 10px;
-    font-size: 16px;
-    border-radius: 8px;
-    border: none;
-  }
-  button {
-    background: #00d4ff;
-    border: none;
-    color: #000;
-    font-weight: bold;
-    padding: 10px 15px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.3s;
-  }
-  button:hover {
-    background: #00a1cc;
-  }
-  #imageInput {
-    display: none;
-  }
-  #avatar {
-    font-size: 50px;
-    text-align: center;
-    margin-bottom: 10px;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GolArena • Jogos ao Vivo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ===== Reset básico ===== */
+    * {
+      margin: 0; padding: 0; box-sizing: border-box;
+    }
+
+    /* ===== Body & Layout ===== */
+    body {
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      font-family: 'Montserrat', sans-serif;
+      color: #E0E0E0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ===== Header fixo com logo e título ===== */
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      background-color: #203A43;
+      padding: 16px 30px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.8);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 1000;
+      user-select: none;
+    }
+
+    header svg {
+      flex-shrink: 0;
+    }
+
+    header h1 {
+      color: #1DB954;
+      font-weight: 700;
+      font-size: 26px;
+    }
+
+    /* ===== Slogan abaixo do header ===== */
+    #slogan {
+      margin-top: 70px; /* espaço abaixo do header fixo */
+      text-align: center;
+      font-style: italic;
+      color: #E0E0E0;
+      font-size: 16px;
+      user-select: none;
+    }
+
+    /* ===== Main content ===== */
+    main {
+      flex: 1;
+      padding: 30px 20px 40px;
+      max-width: 720px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* ===== Lista de jogos ===== */
+    #jogos {
+      list-style: none;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+
+    @media(min-width: 600px){
+      #jogos {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    /* ===== Card individual ===== */
+    .card {
+      background: rgba(255,255,255,0.05);
+      border-radius: 14px;
+      padding: 22px 24px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: default;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 14px 28px rgba(0,0,0,0.6);
+    }
+
+    /* ===== Times e placar ===== */
+    .teams {
+      font-weight: 600;
+      font-size: 20px;
+      color: #F1F1F1;
+      margin-bottom: 8px;
+      text-align: center;
+      letter-spacing: 0.7px;
+    }
+
+    .score {
+      font-weight: 700;
+      font-size: 36px;
+      color: #1DB954;
+      text-align: center;
+      margin-bottom: 12px;
+      font-feature-settings: "tnum";
+      font-variant-numeric: tabular-nums;
+      user-select: text;
+    }
+
+    .status {
+      text-align: center;
+      font-weight: 600;
+      color: #BBB;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      margin-bottom: 8px;
+      user-select: none;
+    }
+
+    /* ===== Container de gols ===== */
+    .goals-container {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    /* ===== Lista de gols para cada time ===== */
+    .goal-list {
+      flex: 1;
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 12px 14px;
+      max-height: 140px;
+      overflow-y: auto;
+      font-size: 14px;
+      color: #DDD;
+      user-select: text;
+    }
+
+    .goal-list h3 {
+      margin-bottom: 8px;
+      color: #1DB954;
+      font-weight: 700;
+      font-size: 16px;
+      border-bottom: 1px solid #1DB954;
+      padding-bottom: 4px;
+      user-select: none;
+    }
+
+    .goal-item {
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      user-select: text;
+    }
+
+    .goal-player {
+      font-style: italic;
+      font-weight: 600;
+      color: #EEE;
+    }
+
+    .goal-minute {
+      color: #A0D468;
+      font-weight: 700;
+      min-width: 40px;
+      text-align: right;
+      user-select: none;
+    }
+
+    /* ===== Animação indicador gol ===== */
+    .goal-indicator {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      background-color: #1DB954;
+      color: #111;
+      font-weight: 700;
+      padding: 6px 12px;
+      font-size: 14px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px #1DB954AA;
+      opacity: 0;
+      animation: pulse 1.2s ease forwards;
+      user-select: none;
+    }
+
+    @keyframes pulse {
+      0% {opacity: 0; transform: scale(0.7);}
+      50% {opacity: 1; transform: scale(1);}
+      100% {opacity: 0; transform: scale(0.7);}
+    }
+
+    /* ===== Mensagens de carregamento e sem jogos ===== */
+    #loading {
+      text-align: center;
+      font-size: 16px;
+      color: #AAA;
+      margin-top: 60px;
+      user-select: none;
+    }
+
+    #no-games {
+      text-align: center;
+      font-size: 20px;
+      color: #666;
+      margin-top: 80px;
+      font-weight: 600;
+      user-select: none;
+    }
+
+    /* ===== Scrollbar estilizado para gols ===== */
+    .goal-list::-webkit-scrollbar {
+      width: 6px;
+    }
+    .goal-list::-webkit-scrollbar-thumb {
+      background-color: #1DB954AA;
+      border-radius: 3px;
+    }
+  </style>
 </head>
 <body>
+  <!-- ===== Header com logo + nome ===== -->
+  <header>
+    <svg width="40" height="40" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" focusable="false">
+      <circle cx="32" cy="32" r="30" stroke="#1DB954" stroke-width="4"/>
+      <path d="M32 12v40M12 32h40M20 20l24 24M44 20L20 44" stroke="#1DB954" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+    <h1>GolArena</h1>
+  </header>
 
-<div id="chat" style="display:none;">
-  <div id="avatar">🤖</div>
-  <div id="messages"></div>
-  <div id="inputRow">
-    <input type="text" id="input" placeholder="Digite sua mensagem..." autocomplete="off" />
-    <button id="sendBtn" title="Enviar mensagem">Enviar</button>
-    <button id="micBtn" title="Falar" aria-label="Falar">🎙️</button>
-    <button id="imgBtn" title="Enviar imagem" aria-label="Enviar imagem">📷</button>
-    <input type="file" id="imageInput" accept="image/*" />
-  </div>
-</div>
+  <!-- ===== Slogan ===== -->
+  <p id="slogan">Onde cada gol vira espetáculo</p>
 
-<script>
-  // Usuários fixos para login simples
-  const USERS = {
-    'gabriel': '123456',
-    'admin': 'admin123'
-  };
+  <main>
+    <div id="loading">Carregando jogos ao vivo...</div>
+    <ul id="jogos" aria-live="polite" aria-label="Lista de jogos ao vivo"></ul>
+    <div id="no-games" hidden>Nenhum jogo ao vivo no momento.</div>
+  </main>
 
-  let username;
-  const OPENAI_API_KEY = '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';
-
-  const chat = document.getElementById('chat');
-  const messagesEl = document.getElementById('messages');
-  const inputEl = document.getElementById('input');
-  const sendBtn = document.getElementById('sendBtn');
-  const micBtn = document.getElementById('micBtn');
-  const imgBtn = document.getElementById('imgBtn');
-  const imageInput = document.getElementById('imageInput');
-  const avatarEl = document.getElementById('avatar');
-
-  // Histórico de mensagens
-  let history = JSON.parse(localStorage.getItem('prod2bity_history')) || [];
-
-  // Atualiza avatar emoji conforme sentimento simples (palavras-chave)
-  function updateAvatarMood(text) {
-    const positive = ['bom', 'ótimo', 'legal', 'adoro', 'gostei', 'feliz', 'engraçado'];
-    const negative = ['triste', 'ruim', 'péssimo', 'ódio', 'chateado', 'raiva'];
-
-    const lower = text.toLowerCase();
-
-    if (positive.some(w => lower.includes(w))) avatarEl.textContent = '😄';
-    else if (negative.some(w => lower.includes(w))) avatarEl.textContent = '😞';
-    else avatarEl.textContent = '🤖';
-  }
-
-  // Salva e mostra histórico ao carregar
-  function loadHistory() {
-    messagesEl.innerHTML = '';
-    history.forEach(({ sender, text }) => {
-      addMessage(sender, text, sender === username ? 'user' : 'bot');
-    });
-  }
-
-  // Adiciona mensagem e salva no histórico
-  function addMessage(sender, text, cls) {
-    const div = document.createElement('div');
-    div.className = 'msg ' + cls;
-    div.textContent = text;
-    messagesEl.appendChild(div);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-
-    history.push({ sender, text });
-    localStorage.setItem('prod2bity_history', JSON.stringify(history));
-  }
-
-  // Fala o texto
-  function speak(text) {
-    if (!('speechSynthesis' in window)) return;
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'pt-BR';
-    speechSynthesis.speak(utterance);
-  }
-
-  // Converte arquivo para Base64
-  function toBase64(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result.split(',')[1]);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  }
-
-  // Chamar API OpenAI ChatGPT
-  async function queryChatAPI(messages) {
-    try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + OPENAI_API_KEY
-        },
-        body: JSON.stringify({
-          model: 'gpt-3.5-turbo',
-          messages: messages,
-          temperature: 0.7,
-          max_tokens: 300
-        })
-      });
-      if(!response.ok) {
-        console.error('Erro HTTP:', response.status, await response.text());
-        return "Erro na resposta da API.";
-      }
-      const data = await response.json();
-      return data.choices[0].message.content.trim();
-    } catch(e) {
-      console.error('Erro na queryChatAPI:', e);
-      return "Desculpe, não consegui responder no momento.";
+  <script>
+    // Solicitar permissão para notificações se ainda não concedida
+    if (Notification.permission !== "granted") {
+      Notification.requestPermission();
     }
-  }
 
-  // Função para analisar imagens via HuggingFace (exemplo)
-  async function queryImageAPI(base64image) {
-    try {
-      const response = await fetch('https://huggingface-api-proxy.vercel.app/api/vision', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'Salesforce/blip-image-captioning-base',
-          image: base64image
-        })
-      });
-      const data = await response.json();
-      return data.caption || "Não consegui entender a imagem.";
-    } catch {
-      return "Não consegui analisar a imagem agora.";
+    const jogosEl = document.getElementById("jogos");
+    const loadingEl = document.getElementById("loading");
+    const noGamesEl = document.getElementById("no-games");
+    let jogoAnterior = {};
+
+    /**
+     * Cria HTML para lista de gols por time
+     * @param {Array} scorers - lista simulada de artilheiros
+     * @param {string} lado - "home" ou "away"
+     * @returns {string} HTML com os gols formatados
+     */
+    function formatarGols(scorers, lado) {
+      if (!scorers || !Array.isArray(scorers)) return '<p style="color:#666;">Sem gols</p>';
+      const golsDoTime = scorers.filter(g => g.team.toLowerCase() === lado);
+      if (golsDoTime.length === 0) return '<p style="color:#666;">Sem gols</p>';
+      return golsDoTime.map(gol => `
+        <div class="goal-item">
+          <span class="goal-player">${gol.player}</span>
+          <span class="goal-minute">${gol.minute}’</span>
+        </div>
+      `).join('');
     }
-  }
 
-  // Envia texto para IA
-  async function sendText(text) {
-    addMessage(username, text, 'user');
-    updateAvatarMood(text);
+    /**
+     * Cria um card do jogo com detalhes e gols
+     * @param {Object} jogo - dados do jogo
+     * @param {boolean} isGoal - se teve gol recente para animar
+     * @returns {HTMLElement} elemento <li> do jogo
+     */
+    function criarCard(jogo, isGoal = false) {
+      const li = document.createElement("li");
+      li.classList.add("card");
 
-    const messages = [
-      { role: "system", content: "Você é a ProD2Bity IA, inteligente e amigável. Responda em português." }
-    ];
+      const homeName = jogo.homeTeam.name;
+      const awayName = jogo.awayTeam.name;
+      const homeScore = jogo.score.fullTime.home ?? 0;
+      const awayScore = jogo.score.fullTime.away ?? 0;
+      const status = jogo.status;
 
-    history.forEach(h => {
-      if(h.sender === username) {
-        messages.push({ role: "user", content: h.text });
-      } else {
-        messages.push({ role: "assistant", content: h.text });
-      }
-    });
+      li.innerHTML = `
+        <div class="status">${status === "LIVE" ? "Ao Vivo" : status}</div>
+        <div class="teams">${homeName} vs ${awayName}</div>
+        <div class="score">${homeScore} x ${awayScore}</div>
+        <div class="goals-container">
+          <section class="goal-list" aria-label="Gols de ${homeName}">
+            <h3>${homeName}</h3>
+            ${formatarGols(jogo.scorers, 'home')}
+          </section>
+          <section class="goal-list" aria-label="Gols de ${awayName}">
+            <h3>${awayName}</h3>
+            ${formatarGols(jogo.scorers, 'away')}
+          </section>
+        </div>
+      `;
 
-    messages.push({ role: "user", content: text });
-
-    const reply = await queryChatAPI(messages);
-    addMessage('ProD2Bity IA', reply, 'bot');
-    updateAvatarMood(reply);
-    speak(reply);
-  }
-
-  // Envia imagem para IA
-  async function sendImage(file) {
-    addMessage(username, '[Imagem enviada]', 'user');
-    updateAvatarMood('imagem enviada');
-    const base64 = await toBase64(file);
-    const caption = await queryImageAPI(base64);
-    addMessage('ProD2Bity IA', `Descrição da imagem: ${caption}`, 'bot');
-    updateAvatarMood(caption);
-    speak(caption);
-  }
-
-  // Login simples
-  async function login() {
-    let user = sessionStorage.getItem('prod2bity_user');
-    if(user) return user;
-
-    while(true) {
-      user = prompt('Digite seu nome de usuário:');
-      if(!user) {
-        alert('Nome de usuário obrigatório!');
-        continue;
-      }
-      user = user.toLowerCase();
-
-      if(!USERS[user]) {
-        alert('Usuário não encontrado.');
-        continue;
+      if (isGoal) {
+        const goalDiv = document.createElement("div");
+        goalDiv.className = "goal-indicator";
+        goalDiv.textContent = "GOL!";
+        li.appendChild(goalDiv);
+        setTimeout(() => {
+          if(goalDiv.parentNode) goalDiv.parentNode.removeChild(goalDiv);
+        }, 1200);
       }
 
-      const pass = prompt('Digite sua senha:');
-      if(!pass) {
-        alert('Senha obrigatória!');
-        continue;
-      }
+      return li;
+    }
 
-      if(USERS[user] === pass) {
-        sessionStorage.setItem('prod2bity_user', user);
-        alert('Login realizado com sucesso!');
-        return user;
-      } else {
-        alert('Senha incorreta.');
+    /**
+     * Busca jogos ao vivo e atualiza a lista
+     */
+    async function buscarJogos() {
+      try {
+        loadingEl.hidden = false;
+        noGamesEl.hidden = true;
+
+        const res = await fetch("https://api.football-data.org/v4/matches?status=LIVE", {
+          headers: { "X-Auth-Token": "932dba4abe844f11b3e8fd48d1f20af9" }
+        });
+        const data = await res.json();
+        const jogos = data.matches || [];
+
+        loadingEl.hidden = true;
+        jogosEl.innerHTML = "";
+
+        if (jogos.length === 0) {
+          noGamesEl.hidden = false;
+          return;
+        }
+
+        // Percorrer jogos e criar cards
+        for (const jogo of jogos) {
+          const id = `${jogo.homeTeam.name} vs ${jogo.awayTeam.name}`;
+          const homeScore = jogo.score.fullTime.home ?? 0;
+          const awayScore = jogo.score.fullTime.away ?? 0;
+          const anterior = jogoAnterior[id];
+
+          // Simular artilheiros (exemplo temporário, pois a API oficial não entrega essa info)
+          jogo.scorers = [
+            ...(homeScore > 0 ? [{team:'home', player:'Jogador A', minute:12}] : []),
+            ...(awayScore > 0 ? [{team:'away', player:'Jogador B', minute:33}] : [])
+          ];
+
+          const isGoal = anterior && (anterior.homeScore !== homeScore || anterior.awayScore !== awayScore);
+
+          jogosEl.appendChild(criarCard(jogo, isGoal));
+
+          if (isGoal && Notification.permission === "granted") {
+            new Notification("⚽ Gol Atualizado!", {
+              body: `${jogo.homeTeam.name} ${homeScore} x ${awayScore} ${jogo.awayTeam.name}`,
+            });
+          }
+
+          jogoAnterior[id] = { homeScore, awayScore };
+        }
+      } catch (err) {
+        loadingEl.textContent = "Erro ao carregar jogos. Tente recarregar a página.";
+        console.error(err);
       }
     }
-  }
 
-  // Eventos e listeners
-  sendBtn.onclick = () => {
-    const text = inputEl.value.trim();
-    if (text) {
-      sendText(text);
-      inputEl.value = '';
-    }
-  };
-
-  inputEl.addEventListener('keydown', e => {
-    if (e.key === 'Enter') sendBtn.click();
-  });
-
-  micBtn.onclick = () => {
-    if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
-      alert('Seu navegador não suporta reconhecimento de voz.');
-      return;
-    }
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
-    recognition.lang = 'pt-BR';
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
-
-    recognition.onresult = e => {
-      const speechText = e.results[0][0].transcript;
-      inputEl.value = speechText;
-      sendBtn.click();
-    };
-
-    recognition.onerror = e => {
-      alert('Erro no reconhecimento de voz: ' + e.error);
-    };
-
-    recognition.start();
-  };
-
-  imgBtn.onclick = () => imageInput.click();
-
-  imageInput.onchange = () => {
-    const file = imageInput.files[0];
-    if (file) sendImage(file);
-  };
-
-  // Inicialização
-  (async () => {
-    username = await login();
-    chat.style.display = 'flex';
-    loadHistory();
-  })();
-</script>
-
+    // Inicializar e atualizar a cada 15 segundos
+    buscarJogos();
+    setInterval(buscarJogos, 15000);
+  </script>
 </body>
 </html>
