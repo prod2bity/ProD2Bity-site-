@@ -1,179 +1,78 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>InovaHub — O Futuro Começa Aqui</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
-
-    * {
-      margin: 0; padding: 0; box-sizing: border-box;
-      font-family: 'Poppins', sans-serif;
-    }
-
-    body, html {
-      height: 100%;
-      background: linear-gradient(135deg, #1f1c2c, #928dab);
-      color: #fff;
-      overflow-x: hidden;
-    }
-
-    header {
-      padding: 2rem 3rem;
-      text-align: center;
-      background: rgba(0,0,0,0.4);
-      backdrop-filter: blur(8px);
-      box-shadow: 0 0 10px rgba(0,0,0,0.5);
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-
-    header h1 {
-      font-weight: 700;
-      font-size: 2.8rem;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: #ff6f61;
-      text-shadow: 0 0 12px #ff6f61;
-      animation: pulse 3s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { text-shadow: 0 0 12px #ff6f61; }
-      50% { text-shadow: 0 0 25px #ff3a1a; }
-    }
-
-    main {
-      max-width: 960px;
-      margin: 4rem auto;
-      padding: 0 1.5rem;
-      text-align: center;
-    }
-
-    main h2 {
-      font-size: 2rem;
-      margin-bottom: 1rem;
-      color: #ffd369;
-      text-shadow: 0 0 5px #d4a73c;
-    }
-
-    main p {
-      font-size: 1.2rem;
-      line-height: 1.6;
-      margin-bottom: 3rem;
-      color: #ddd;
-      text-shadow: 0 0 3px #333;
-    }
-
-    .cta-button {
-      background: linear-gradient(45deg, #ff6f61, #ff3a1a);
-      border: none;
-      padding: 1rem 3rem;
-      font-size: 1.3rem;
-      font-weight: 700;
-      color: #fff;
-      border-radius: 50px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 15px rgba(255, 111, 97, 0.6);
-      user-select: none;
-    }
-
-    .cta-button:hover {
-      transform: scale(1.1);
-      box-shadow: 0 6px 20px rgba(255, 58, 26, 0.9);
-    }
-
-    /* Background floating shapes */
-    .shape {
-      position: fixed;
-      border-radius: 50%;
-      opacity: 0.15;
-      animation: float 6s ease-in-out infinite alternate;
-      pointer-events: none;
-      filter: blur(10px);
-      z-index: 0;
-    }
-
-    .shape1 {
-      width: 200px; height: 200px;
-      background: #ff6f61;
-      top: 10%;
-      left: 5%;
-      animation-delay: 0s;
-    }
-    .shape2 {
-      width: 300px; height: 300px;
-      background: #ffd369;
-      bottom: 15%;
-      right: 8%;
-      animation-delay: 3s;
-    }
-    .shape3 {
-      width: 150px; height: 150px;
-      background: #ff3a1a;
-      top: 50%;
-      right: 20%;
-      animation-delay: 1.5s;
-    }
-
-    @keyframes float {
-      0% { transform: translateY(0); }
-      100% { transform: translateY(-30px); }
-    }
-
-    footer {
-      margin-top: 6rem;
-      padding: 1.5rem;
-      text-align: center;
-      font-size: 0.9rem;
-      color: #aaa;
-      user-select: none;
-    }
-
-    /* Responsividade */
-    @media (max-width: 600px) {
-      header h1 {
-        font-size: 2rem;
-      }
-
-      main h2 {
-        font-size: 1.5rem;
-      }
-
-      .cta-button {
-        padding: 0.8rem 2rem;
-        font-size: 1.1rem;
-      }
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Chat GPT com OpenAI</title>
+<style>
+  body { font-family: Arial; background:#121212; color:#eee; margin:0; height:100vh; display:flex; flex-direction:column; }
+  #chat { flex:1; overflow-y:auto; padding:1rem; background:#222; }
+  .msg { margin-bottom:1rem; max-width:80%; padding:0.7rem 1rem; border-radius:15px; }
+  .user { background:#1e88e5; margin-left:auto; text-align:right; }
+  .bot { background:#424242; margin-right:auto; text-align:left; }
+  #input-area { display:flex; padding:0.5rem; background:#333; }
+  #input-text { flex:1; padding:0.7rem; border:none; border-radius:20px; font-size:1rem; outline:none; }
+  #send-btn { margin-left:0.5rem; padding:0 1rem; border:none; border-radius:20px; background:#1e88e5; color:#fff; font-weight:bold; cursor:pointer; }
+  #send-btn:hover { background:#1565c0; }
+</style>
 </head>
 <body>
 
-  <div class="shape shape1"></div>
-  <div class="shape shape2"></div>
-  <div class="shape shape3"></div>
+<div id="chat"></div>
+<div id="input-area">
+  <input type="text" id="input-text" placeholder="Digite sua mensagem..." autocomplete="off" />
+  <button id="send-btn">Enviar</button>
+</div>
 
-  <header>
-    <h1>InovaHub</h1>
-  </header>
+<script>
+  const chat = document.getElementById("chat");
+  const inputText = document.getElementById("input-text");
+  const sendBtn = document.getElementById("send-btn");
 
-  <main>
-    <h2>O Futuro Começa Aqui</h2>
-    <p>
-      Conectamos mentes brilhantes, ideias inovadoras e ações transformadoras. 
-      Junte-se a uma comunidade que quer mudar o mundo de verdade, com tecnologia, criatividade e coragem.
-    </p>
-    <button class="cta-button" onclick="alert('Bem-vindo ao InovaHub! Vamos revolucionar juntos!')">
-      Junte-se Agora
-    </button>
-  </main>
+  const messages = [
+    { role: "system", content: "Você é um assistente amigável." }
+  ];
 
-  <footer>
-    © 2025 InovaHub — Criado para revolucionar
-  </footer>
+  function addMessage(text, sender) {
+    const div = document.createElement("div");
+    div.classList.add("msg", sender);
+    div.textContent = text;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  async function sendMessage() {
+    const msg = inputText.value.trim();
+    if (!msg) return;
+    addMessage(msg, "user");
+    messages.push({ role: "user", content: msg });
+    inputText.value = "";
+    
+    addMessage("...", "bot"); // indicador de carregamento
+    chat.lastChild.scrollIntoView();
+
+    try {
+      const response = await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages }),
+      });
+      const data = await response.json();
+      chat.removeChild(chat.lastChild); // remove "..."
+      addMessage(data.reply, "bot");
+      messages.push({ role: "assistant", content: data.reply });
+    } catch (error) {
+      chat.removeChild(chat.lastChild);
+      addMessage("Erro ao conectar com a IA.", "bot");
+      console.error(error);
+    }
+  }
+
+  sendBtn.addEventListener("click", sendMessage);
+  inputText.addEventListener("keypress", e => {
+    if (e.key === "Enter") sendMessage();
+  });
+</script>
 
 </body>
 </html>
